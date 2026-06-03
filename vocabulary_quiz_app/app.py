@@ -21,51 +21,144 @@ class VocabularyQuizApp:
         self.default_font.configure(family="NanumGothic", size=12)
 
         root.title("Vocabulary Quiz")
-        root.geometry("420x280")
+        root.geometry("420x320")
         root.resizable(False, False)
 
         self.word_var = tk.StringVar(value="단어를 불러오는 중...")
         self.feedback_var = tk.StringVar(value="")
         self.score_var = tk.StringVar(value="Score: 0/0")
 
-        ttk.Label(root, text="영단어").pack(pady=(16, 4))
-        ttk.Label(root, textvariable=self.word_var, font=("NanumGothic", 24)).pack()
+        # 진행률 표시용 변수 추가
+        self.progress_var = tk.StringVar(value="진행률: 0%")
 
-        self.answer_entry = ttk.Entry(root, font=("NanumGothic", 14))
-        self.answer_entry.pack(pady=12, ipadx=6, ipady=4)
+        ttk.Label(root, text="영단어").pack(pady=(16, 4))
+        ttk.Label(
+            root,
+            textvariable=self.word_var,
+            font=("NanumGothic", 24)
+        ).pack()
+
+        self.answer_entry = ttk.Entry(
+            root,
+            font=("NanumGothic", 14)
+        )
+        self.answer_entry.pack(
+            pady=12,
+            ipadx=6,
+            ipady=4
+        )
 
         buttons = ttk.Frame(root)
         buttons.pack(pady=6)
-        self.check_button = ttk.Button(buttons, text="채점", command=self.check_current)
-        self.check_button.pack(side=tk.LEFT, padx=6)
-        ttk.Button(buttons, text="다음", command=self.next_word).pack(
-            side=tk.LEFT, padx=6
+
+        self.check_button = ttk.Button(
+            buttons,
+            text="채점",
+            command=self.check_current
+        )
+        self.check_button.pack(
+            side=tk.LEFT,
+            padx=6
         )
 
-        ttk.Label(root, textvariable=self.feedback_var).pack(pady=8)
-        ttk.Label(root, textvariable=self.score_var).pack()
+        ttk.Button(
+            buttons,
+            text="다음",
+            command=self.next_word
+        ).pack(
+            side=tk.LEFT,
+            padx=6
+        )
+
+        ttk.Label(
+            root,
+            textvariable=self.feedback_var
+        ).pack(pady=8)
+
+        ttk.Label(
+            root,
+            textvariable=self.score_var
+        ).pack()
+
+        # 진행률 바 추가
+        self.progress_bar = ttk.Progressbar(
+            root,
+            orient="horizontal",
+            length=250,
+            mode="determinate",
+            maximum=len(self.words)
+        )
+        self.progress_bar.pack(pady=5)
+
+        ttk.Label(
+            root,
+            textvariable=self.progress_var
+        ).pack()
 
         self.next_word()
 
     def next_word(self) -> None:
-        self.current = draw_word(self.words, self.rng)
-        self.word_var.set(self.current.term)
-        self.answer_entry.delete(0, tk.END)
+        self.current = draw_word(
+            self.words,
+            self.rng
+        )
+
+        self.word_var.set(
+            self.current.term
+        )
+
+        self.answer_entry.delete(
+            0,
+            tk.END
+        )
+
         self.feedback_var.set("")
+
         self.checked = False
-        self.check_button.state(["!disabled"])
+
+        self.check_button.state(
+            ["!disabled"]
+        )
+
         self.answer_entry.focus()
 
     def check_current(self) -> None:
         if self.current is None or self.checked:
             return
+
         self.checked = True
         self.total += 1
+
         user_input = self.answer_entry.get()
-        if check_answer(self.current, user_input):
+
+        if check_answer(
+            self.current,
+            user_input
+        ):
             self.score += 1
-            self.feedback_var.set("정답입니다!")
+            self.feedback_var.set(
+                "정답입니다!"
+            )
         else:
-            self.feedback_var.set(f"오답입니다. 정답: {self.current.meaning}")
-        self.score_var.set(f"Score: {self.score}/{self.total}")
-        self.check_button.state(["disabled"])
+            self.feedback_var.set(
+                f"오답입니다. 정답: {self.current.meaning}"
+            )
+
+        self.score_var.set(
+            f"Score: {self.score}/{self.total}"
+        )
+
+        # 진행률 업데이트
+        self.progress_bar["value"] = self.total
+
+        progress_percent = int(
+            self.total / len(self.words) * 100
+        )
+
+        self.progress_var.set(
+            f"진행률: {progress_percent}%"
+        )
+
+        self.check_button.state(
+            ["disabled"]
+        )
