@@ -167,7 +167,7 @@ class VocabularyQuizApp:
         )
 
     # 추가: Enter 키 입력 처리
-       def on_enter_pressed(self, event: tk.Event) -> None:
+    def on_enter_pressed(self, event: tk.Event) -> None:
         if self.checked:
             self.next_word()
         else:
